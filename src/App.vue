@@ -2,6 +2,7 @@
   <div class="map">
     <svg
       id="svgMap"
+      ref="svgMap"
       width="100%"
       height="100%"
       class="map-svg"
@@ -11,7 +12,6 @@
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        v-if="regionsColors.KHE"
         :fill="regionsColors?.KHE?.fill ?? '#DCDCDC'"
         @click.prevent="
           monitoring.selected.region = 'KHE';
@@ -22,7 +22,6 @@
         fill="#A7A7A7"
       />
       <path
-        v-if="regionsColors.ZPR"
         :fill="regionsColors?.ZPR?.fill ?? '#DCDCDC'"
         @click.prevent="
           monitoring.selected.region = 'ZPR';
@@ -33,7 +32,6 @@
         fill="#A7A7A7"
       />
       <path
-        v-if="regionsColors.DNR"
         :fill="regionsColors?.DNR?.fill ?? '#DCDCDC'"
         @click.prevent="
           monitoring.selected.region = 'DNR';
@@ -44,7 +42,6 @@
         fill="#A7A7A7"
       />
       <path
-        v-if="regionsColors.LNR"
         :fill="regionsColors?.LNR?.fill ?? '#DCDCDC'"
         @click.prevent="
           monitoring.selected.region = 'LNR';
@@ -665,13 +662,16 @@
   </div>
   <div class="input">
     <input type="file" @change="handleFileUpload" />
-    <button @click="downloadSVG()">Загрузить карту</button>
+    <button @click="downloadSVG()">Загрузить карту в SVG</button>
+    <button @click="downloadPNG()">Загрузить карту в PNG</button>
   </div>
 </template>
 
 <script setup>
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
 import Papa from "papaparse";
+import * as htmlToImage from "html-to-image";
+import { toPng } from "html-to-image";
 const monitoring = { selected: { region: "asd" } };
 const regionsColors = reactive({
   ZPR: {},
@@ -765,6 +765,7 @@ const regionsColors = reactive({
   YAR: {},
   undefined: {},
 });
+const svgMap = ref(null);
 const handleFileUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
@@ -829,15 +830,37 @@ function downloadSVG() {
 
   const link = document.createElement("a");
   link.href = url;
-  link.download = "mySVG.svg"; // Указываем имя файла для скачивания
+  link.download = "svgMap.svg"; // Указываем имя файла для скачивания
   link.click();
 
   URL.revokeObjectURL(url); // Освобождаем URL объекта
+}
+
+function downloadPNG() {
+  const node = document.getElementById("svgMap"); // Получаем SVG элемент
+
+  htmlToImage
+    .toPng(node)
+    .then(function (dataUrl) {
+      var img = new Image();
+      img.src = dataUrl;
+      const link = document.createElement("a");
+      link.href = img.src;
+      link.download = "pngMap.png"; // Указываем имя файла для скачивания
+      link.click();
+    })
+    .catch(function (error) {
+      console.error("oops, something went wrong!", error);
+    });
 }
 </script>
 
 <style scoped>
 .map {
   height: 94vh;
+}
+
+button {
+  margin-right: 50px;
 }
 </style>
