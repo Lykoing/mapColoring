@@ -758,7 +758,7 @@ const parseCSV = (file) => {
               color = "#86dfa4";
               break;
             case "e":
-              color = "#d9d9d9";
+              color = "#a4e4f8";
               break;
             default:
               color = undefined;
